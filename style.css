@@ -429,44 +429,78 @@ body {
   --hover-position: 0%;
 
   position: relative;
-  height: 4px;
+  isolation: isolate;
   width: 36vw;
+  height: 4px;
   margin-top: 12px;
   margin-bottom: 5px;
-  border-radius: 5px;
+  border-radius: 999px;
+  background: #666666 !important;
+  color-scheme: only dark;
+  forced-color-adjust: none;
   cursor: pointer;
-
-  background: linear-gradient(
-    to right,
-    #ffffff 0%,
-    #ffffff var(--progress),
-    #666666 var(--progress),
-    #666666 100%
-  );
+}
+.seekbar {
+  -webkit-tap-highlight-color: transparent;
+  tap-highlight-color: transparent;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
 }
 
-.seekbar:hover {
-  background: linear-gradient(
-    to right,
-    #8b5cf6 0%,
-    #22d3ee var(--progress),
-    #ffffff var(--progress),
-    #ffffff var(--hover-position),
-    #666666 var(--hover-position),
-    #666666 100%
-  );
+/* Played portion */
+.seekbar::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--progress);
+  border-radius: 999px;
+  background: #ffffff !important;
+  forced-color-adjust: none;
+  pointer-events: none;
+}
+
+/* Desktop hover preview portion */
+.seekbar::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  bottom: 0;
+  left: var(--progress);
+  width: 0;
+  border-radius: 999px;
+  background: #ffffff !important;
+  forced-color-adjust: none;
+  pointer-events: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .seekbar:hover::before {
+    background: linear-gradient(90deg, #8b5cf6, #22d3ee) !important;
+  }
+
+  .seekbar:hover::after {
+    width: calc(var(--hover-position) - var(--progress));
+  }
 }
 
 .circle {
   position: absolute;
+  z-index: 2;
   top: 50%;
   left: 0%;
   width: 15px;
   height: 15px;
   border-radius: 50%;
-  background-color: #ffffff;
+  background-color: #ffffff !important;
   transform: translate(-50%, -50%);
   transition: none !important;
+  forced-color-adjust: none;
   pointer-events: none;
 }
 
@@ -820,4 +854,35 @@ body {
 
 .seekbar.seekbar-ready {
   visibility: visible;
+}
+
+/* Mobile seek bar has no hover preview */
+@media (max-width: 500px) {
+  .seekbar {
+    background: #666666 !important;
+  }
+
+  .seekbar::before,
+  .seekbar:hover::before,
+  .seekbar:active::before,
+  .seekbar:focus::before {
+    background: #ffffff !important;
+  }
+
+  .seekbar::after,
+  .seekbar:hover::after,
+  .seekbar:active::after,
+  .seekbar:focus::after {
+    display: none !important;
+  }
+
+  .seek-tooltip,
+  .seekbar:hover .seek-tooltip,
+  .seekbar:active .seek-tooltip,
+  .seekbar:focus .seek-tooltip,
+  .seekbar:focus-within .seek-tooltip {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translate(-50%, 6px) !important;
+  }
 }
