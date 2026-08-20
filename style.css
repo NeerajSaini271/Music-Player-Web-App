@@ -613,8 +613,46 @@ body {
   }
 
   .left {
-    width: min(88vw, 390px);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: -100%;
+    z-index: 100;
+    width: 100vw;
     height: 100dvh;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background-color: #000000;
+  }
+
+  .left .home,
+  .left .library {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .left .library {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .left .songList {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .left .close {
+    position: relative;
+    z-index: 101;
+  }
+
+  .left .close img {
+    top: 22px;
+    right: 22px;
   }
 
   .right {
