@@ -264,6 +264,15 @@ async function displayAlbums() {
   });
 }
 
+function updateVolumeProgress() {
+  const volumeSlider = document.querySelector('.range input[type="range"]');
+
+  volumeSlider.style.setProperty(
+    "--volume-progress",
+    `${currentSongs.volume * 100}%`,
+  );
+}
+
 function updateVolumeIcon() {
   const volumeIcon = document.querySelector(".volume > img");
 
@@ -497,6 +506,7 @@ async function main() {
   currentSongs.volume = lastVolume;
   volumeSlider.value = Math.round(lastVolume * 100);
   updateVolumeIcon();
+  updateVolumeProgress();
 
   document.querySelector(".volume").classList.add("volume-ready");
 
@@ -505,12 +515,14 @@ async function main() {
 
     if (currentSongs.volume > 0) {
       lastVolume = currentSongs.volume;
+
       localStorage.setItem(
         "nksMusicPlayerVolume",
         currentSongs.volume.toString(),
       );
     }
 
+    updateVolumeProgress();
     updateVolumeIcon();
   });
 
@@ -521,9 +533,11 @@ async function main() {
       volumeSlider.value = 0;
     } else {
       currentSongs.volume = lastVolume > 0 ? lastVolume : 0.75;
-      volumeSlider.value = currentSongs.volume * 100;
+
+      volumeSlider.value = Math.round(currentSongs.volume * 100);
     }
 
+    updateVolumeProgress();
     updateVolumeIcon();
   });
   window.addEventListener("beforeunload", () => {
