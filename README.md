@@ -8,8 +8,22 @@
   A responsive browser-based music player built with HTML, CSS, and vanilla JavaScript.
 </p>
 
-## Overview
+## Live Demo
 
+**Production website:**
+https://music-player-web-app-three.vercel.app
+
+## Preview
+
+[![NKS MusicPlayer preview](img/nks-musicplayer-preview.png)](https://music-player-web-app-three.vercel.app)
+
+The production version includes two CC0 demo collections:
+
+- **Bright and Playful**
+- **Lighthearted Classics**
+
+The player includes six verified CC0 public-domain tracks, custom album artwork, synchronized song-row controls, previous and next navigation, seek preview, saved volume, and saved playback state.
+## Overview
 NKS MusicPlayer is an independent educational web project that loads locally available album metadata and audio tracks. The interface includes album browsing, a scrollable song library, synchronized play and pause controls, track navigation, seeking, volume control, mute restoration, and responsive navigation.
 
 ## Features
