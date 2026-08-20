@@ -13,8 +13,13 @@ body {
 
 .left {
   width: 25vw;
+  height: 100vh;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
+
 .right {
   width: 75vw;
   margin: 15px 15px 15px 0px;
@@ -22,7 +27,9 @@ body {
 }
 
 .home img {
-  width: 100px;
+  width: 170px;
+  height: auto;
+  display: block;
 }
 
 .home ul li {
@@ -49,18 +56,31 @@ body {
 .heading img {
   width: 30px;
 }
+
 .library {
-  min-height: 73vh;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   position: relative;
 }
 
+.songList {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  overflow-y: auto;
+}
+
 .footer {
+  position: static;
+  flex-shrink: 0;
+  padding: 12px 0 4px;
   display: flex;
   flex-wrap: wrap;
   gap: 13px;
   font-size: 12px;
-  position: absolute;
-  bottom: 10px;
+  background: #121212;
 }
 
 .footer a {
@@ -98,7 +118,7 @@ body {
   cursor: pointer;
 }
 
-.spotifyPlaylists {
+.musicPlaylists {
   padding: 16px;
   max-height: 83vh;
   overflow-y: scroll;
@@ -184,38 +204,6 @@ body {
 .buttons > * {
   margin: 0 5px;
 }
-.signupbtn {
-  padding: 10px;
-  border: none;
-  background-color: transparent;
-  font-weight: 700;
-  color: #ffffffb3;
-  font-size: 14px;
-  cursor: pointer;
-  transition: transform 0.1s ease, color 0.1s ease;
-  transform-origin: center;
-  will-change: transform;
-}
-.signupbtn:hover {
-  color: white;
-  transform: scale(1.05);
-}
-
-.loginbtn {
-  font-size: 16px;
-  font-weight: 700;
-  padding: 10px 22px;
-  border-radius: 30px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.1s ease;
-  transform-origin: center;
-  will-change: transform;
-}
-.loginbtn:hover {
-  transform: scale(1.05);
-}
-
 .playbar {
   position: absolute;
   bottom: 0;
@@ -279,10 +267,11 @@ body {
   height: 5px;
 }
 .range input[type="range"]:hover {
-  accent-color: #1db954;
+  accent-color: #8b5cf6;
 }
+
 .volume:hover .range input[type="range"] {
-  accent-color: #1db954;
+  accent-color: #8b5cf6;
 }
 
 .songbuttons {
@@ -296,14 +285,18 @@ body {
   filter: invert(0);
   width: 30px;
   cursor: pointer;
-  transition: transform 0.1s ease, color 0.1s ease;
+  transition:
+    transform 0.1s ease,
+    color 0.1s ease;
   transform-origin: center;
   will-change: transform;
 }
 .songbuttons svg {
   width: 18px;
   cursor: pointer;
-  transition: transform 0.1s ease, color 0.1s ease;
+  transition:
+    transform 0.1s ease,
+    color 0.1s ease;
   transform-origin: center;
   will-change: transform;
 }
@@ -321,11 +314,6 @@ body {
   transform: scale(1.04);
 }
 
-.songList {
-  height: 52vh;
-  overflow: auto;
-}
-
 .songList ul {
   padding: 0 12px;
 }
@@ -333,10 +321,10 @@ body {
 .songList ul li {
   list-style-type: decimal;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   cursor: pointer;
-  padding: 12px 0;
   border: 1px solid white;
   margin: 12px 0;
   padding: 13px;
@@ -349,46 +337,99 @@ body {
 
 .playnow {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  flex: 0 0 36px;
 }
+
 .playnow span {
-  font-size: 14px;
-  width: 64px;
-  padding: 12px;
+  display: none;
+}
+
+.song-play-icon {
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
 }
 
 .seekbar {
+  --progress: 0%;
+  --hover-position: 0%;
+
+  position: relative;
   height: 4px;
   width: 36vw;
-  background-color: rgb(199, 199, 199);
-  border-radius: 5px;
   margin-top: 12px;
-  cursor: pointer;
   margin-bottom: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+
+  background: linear-gradient(
+    to right,
+    #ffffff 0%,
+    #ffffff var(--progress),
+    #666666 var(--progress),
+    #666666 100%
+  );
 }
 
 .seekbar:hover {
-  background-color: #1db954;
+  background: linear-gradient(
+    to right,
+    #8b5cf6 0%,
+    #22d3ee var(--progress),
+    #ffffff var(--progress),
+    #ffffff var(--hover-position),
+    #666666 var(--hover-position),
+    #666666 100%
+  );
 }
-/* .seekbar:hover .circle{
-  visibility: visible;
-}
-.circle{
-  visibility: hidden;
-} */
 
 .circle {
-  height: 15px;
-  width: 15px;
-  background-color: white;
-  border-radius: 50%;
-  position: relative;
-  bottom: 6px;
+  position: absolute;
+  top: 50%;
   left: 0%;
-  transition: left 0.5s;
-  will-change: left;
-  /* visibility: hidden; */
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  transform: translate(-50%, -50%);
+  transition: none !important;
+  pointer-events: none;
+}
+
+.seek-tooltip {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  z-index: 5;
+  display: block;
+  padding: 4px 7px;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #111111;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 6px);
+  transition:
+    opacity 0.25s ease 0.08s,
+    transform 0.25s ease 0.08s,
+    visibility 0s linear 0.33s;
+  pointer-events: none;
+}
+
+.seekbar:hover .seek-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+  transition:
+    opacity 0.25s ease 0.08s,
+    transform 0.25s ease 0.08s,
+    visibility 0s linear 0s;
 }
 
 .abovebar {
@@ -396,6 +437,34 @@ body {
   justify-content: space-between;
   width: 100%;
   margin: 5px 0px;
+}
+
+.projectbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 20px;
+  background-color: #ffffff;
+  color: #111111;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.1s ease;
+}
+
+.projectbtn:hover,
+.projectbtn:focus-visible {
+  transform: scale(1.04);
+}
+
+.volume {
+  visibility: hidden;
+}
+
+.volume.volume-ready {
+  visibility: visible;
 }
 
 @media (max-width: 1200px) {
@@ -459,4 +528,13 @@ body {
   .left {
     width: 100vw;
   }
+}
+
+/* NKS seekbar readiness */
+.seekbar {
+  visibility: hidden;
+}
+
+.seekbar.seekbar-ready {
+  visibility: visible;
 }

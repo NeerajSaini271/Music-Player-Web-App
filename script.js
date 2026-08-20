@@ -1,239 +1,514 @@
-console.log("Let's write JavaScript");
-let currentSongs = new Audio();
-let songs;
-let currFolder;
-let currentSongIndex = 0;
+console.log("NKS MusicPlayer initialized");
+
+const currentSongs = new Audio();
+
+// NKS seekbar readiness
+currentSongs.addEventListener("loadedmetadata", () => {
+  requestAnimationFrame(() => {
+    document.querySelector(".seekbar")?.classList.add("seekbar-ready");
+  });
+});
+
+let songs = [];
+let currFolder = "";
+let currentSongIndex = -1;
+let currentTrack = "";
+let lastVolume = Number(localStorage.getItem("nksMusicPlayerVolume")) || 0.75;
+
+const PLAYER_STATE_KEY = "nksMusicPlayerState";
+
+function getSavedPlayerState() {
+  try {
+    return JSON.parse(localStorage.getItem(PLAYER_STATE_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function savePlayerState() {
+  if (!currFolder || !currentTrack) {
+    return;
+  }
+
+  const state = {
+    folder: currFolder,
+    track: currentTrack,
+    index: currentSongIndex,
+    time: currentSongs.currentTime || 0,
+  };
+
+  localStorage.setItem(PLAYER_STATE_KEY, JSON.stringify(state));
+}
 
 function formatTime(seconds) {
-  if (isNaN(seconds) || seconds < 0) {
+  if (!Number.isFinite(seconds) || seconds < 0) {
     return "00:00";
   }
+
   const minutes = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
-  const paddedMinutes = minutes.toString().padStart(2, "0");
-  const paddedSeconds = secs.toString().padStart(2, "0");
-  return `${paddedMinutes}:${paddedSeconds}`;
+
+  return `${minutes.toString().padStart(2, "0")}:${secs
+    .toString()
+    .padStart(2, "0")}`;
+}
+
+function updateSongListIcons() {
+  const songItems = document.querySelectorAll(".songList li");
+
+  songItems.forEach((item, index) => {
+    const icon = item.querySelector(".song-play-icon");
+
+    if (!icon) {
+      return;
+    }
+
+    const itemTrack = songs[index];
+    const isCurrentTrack =
+      itemTrack === currentTrack && index === currentSongIndex;
+    const isPlaying = isCurrentTrack && !currentSongs.paused;
+
+    icon.src = isPlaying ? "img/pause.svg" : "img/play-rounded-max.svg";
+    icon.alt = isPlaying ? "Pause song" : "Play song";
+  });
+}
+
+function updateMainPlayIcon() {
+  const playButton = document.querySelector("#play");
+
+  if (!playButton) {
+    return;
+  }
+
+  playButton.src = currentSongs.paused ? "img/play.svg" : "img/pause.svg";
 }
 
 async function getSongs(folder) {
   currFolder = folder;
-  // Fetch info.json instead of directory listing
-  let a = await fetch(`/${folder}/info.json`);
-  let response = await a.json();
-  let songs = response.songs || [];
 
-  // Show all the songs in the playlist
-  let songUl = document
-    .querySelector(".songList")
-    .getElementsByTagName("ul")[0];
-  songUl.innerHTML = "";
-  for (const song of songs) {
-    songUl.innerHTML += `<li><img src="/img/music.svg" alt="">
-        <div class="info">
-          <div>${song.replaceAll("%20", " ")}</div>
-          <div>Artist</div>
-        </div>
-        <div class="playnow">
-          <span>Play now</span>
-          <img src="img/play-rounded-max.svg" alt="">
-        </div></li>`;
+  const request = await fetch(`${folder}/info.json`);
+
+  if (!request.ok) {
+    throw new Error(`Could not load ${folder}/info.json`);
   }
 
-  // Attach an event listener to each song
-  Array.from(
-    document.querySelector(".songList").getElementsByTagName("li")
-  ).forEach((e, i) => {
-    e.addEventListener("click", () => {
-      playMusic(songs[i], false, i); // Pass index
+  const response = await request.json();
+  songs = response.songs || [];
+
+  const songList = document.querySelector(".songList ul");
+  songList.innerHTML = "";
+
+  songs.forEach((song, index) => {
+    const songItem = document.createElement("li");
+
+    songItem.innerHTML = `
+      <img src="img/music.svg" alt="" />
+      <div class="info">
+        <div>${decodeURIComponent(song)}</div>
+        <div>Artist</div>
+      </div>
+      <div class="playnow">
+        <img
+          class="song-play-icon"
+          src="img/play-rounded-max.svg"
+          alt="Play song"
+        />
+      </div>
+    `;
+
+    songItem.addEventListener("click", async () => {
+      const isLoadedTrack = currentTrack === song && currentSongIndex === index;
+
+      if (isLoadedTrack) {
+        if (currentSongs.paused) {
+          await currentSongs.play();
+        } else {
+          currentSongs.pause();
+        }
+
+        return;
+      }
+
+      playMusic(song, false, index);
     });
+
+    songList.appendChild(songItem);
   });
+
+  updateSongListIcons();
 
   return songs;
 }
 
-const playMusic = (track, pause = false, index = 0) => {
-  currentSongs.src = `/${currFolder}/` + track;
-  currentSongIndex = index; // Track the current index
-  if (!pause) {
-    currentSongs.play();
-    play.src = "img/pause.svg";
+function playMusic(track, pause = false, index = 0) {
+  if (!track) {
+    return;
   }
-  document.querySelector(".songinfo-text").innerHTML = decodeURI(track);
-  document.querySelector(".songtime").innerHTML = "0:00 / 0:00";
-};
 
-// getSongs();
+  const isSameLoadedTrack =
+    currentTrack === track && currentSongIndex === index && currentSongs.src;
+
+  currentTrack = track;
+  currentSongIndex = index;
+
+  if (!isSameLoadedTrack) {
+    currentSongs.src = `${currFolder}/${track}`;
+  }
+
+  document.querySelector(".songinfo-text").textContent =
+    decodeURIComponent(track);
+  document.querySelector(".songtime").textContent = "00:00 / 00:00";
+
+  if (pause) {
+    currentSongs.pause();
+    updateMainPlayIcon();
+    updateSongListIcons();
+    return;
+  }
+
+  currentSongs
+    .play()
+    .catch((error) => console.error("Playback failed:", error));
+}
 
 async function displayAlbums() {
-  // Fetch the list of album folders from albums.json
-  let a = await fetch("/albums.json");
-  let albumFolders = await a.json();
-  let cardContainer = document.querySelector(".cardContainer");
-  cardContainer.innerHTML = "";
+  const request = await fetch("albums.json");
 
-  for (let folder of albumFolders) {
-    // Get the metadata of the folder
-    let a = await fetch(`/songs/${folder}/info.json`);
-    let response = await a.json();
-    cardContainer.innerHTML += `
-      <div data-folder="${folder}" class="card">
-        <div class="play">
-          <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="24" cy="24" r="24" fill="#1ED760" />
-            <path d="M19 16L19 32L33 24L19 16Z" fill="black" />
-          </svg>
-        </div>
-        <img src="/songs/${folder}/${response.cover}" 
-             alt="${response.title}" 
-             onerror="this.src='/img/cover.jpg'" />
-        <h2>${response.title}</h2>
-        <p>${response.description}</p>
-      </div>`;
+  if (!request.ok) {
+    throw new Error("Could not load albums.json");
   }
 
-  // Load a playlist whenever card is clicked
-  Array.from(document.getElementsByClassName("card")).forEach((e) => {
-    e.addEventListener("click", async (item) => {
-      songs = await getSongs(`Songs/${item.currentTarget.dataset.folder}`);
-      playMusic(songs[0]);
+  const albumFolders = await request.json();
+  const cardContainer = document.querySelector(".cardContainer");
+
+  const albumCards = await Promise.all(
+    albumFolders.map(async (folder) => {
+      const metadataRequest = await fetch(`songs/${folder}/info.json`);
+
+      if (!metadataRequest.ok) {
+        console.error(`Could not load metadata for ${folder}`);
+        return "";
+      }
+
+      const metadata = await metadataRequest.json();
+
+      return `
+        <div data-folder="${folder}" class="card">
+          <div class="play">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 48 48"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient
+                  id="albumPlayGradient-${folder.replace(/[^a-zA-Z0-9]/g, "")}"
+                  x1="0"
+                  y1="0"
+                  x2="1"
+                  y2="1"
+                >
+                  <stop offset="0%" stop-color="#8b5cf6" />
+                  <stop offset="100%" stop-color="#22d3ee" />
+                </linearGradient>
+              </defs>
+
+              <circle
+                cx="24"
+                cy="24"
+                r="24"
+                fill="url(#albumPlayGradient-${folder.replace(
+                  /[^a-zA-Z0-9]/g,
+                  "",
+                )})"
+              />
+
+              <path
+                d="M19 16L19 32L33 24L19 16Z"
+                fill="#0b0b10"
+              />
+            </svg>
+          </div>
+
+          <img
+            src="songs/${folder}/${metadata.cover}"
+            alt="${metadata.title}"
+            onerror="this.onerror=null; this.src='img/logo.svg'"
+          />
+
+          <h2>${metadata.title}</h2>
+          <p>${metadata.description}</p>
+        </div>
+      `;
+    }),
+  );
+
+  // Render all albums once after every metadata file is ready.
+  cardContainer.innerHTML = albumCards.join("");
+
+  document.querySelectorAll(".card").forEach((card) => {
+    card.addEventListener("click", async () => {
+      const folder = card.dataset.folder;
+
+      currentSongs.pause();
+      currentTrack = "";
+      currentSongIndex = -1;
+
+      songs = await getSongs(`songs/${folder}`);
+
+      if (songs.length > 0) {
+        playMusic(songs[0], false, 0);
+      }
     });
   });
 }
 
+function updateVolumeIcon() {
+  const volumeIcon = document.querySelector(".volume > img");
+
+  if (currentSongs.volume === 0) {
+    volumeIcon.src = "img/volume-mute.svg";
+  } else if (currentSongs.volume < 0.3) {
+    volumeIcon.src = "img/volume-low.svg";
+  } else if (currentSongs.volume < 0.7) {
+    volumeIcon.src = "img/volume-half.svg";
+  } else {
+    volumeIcon.src = "img/volume-full.svg";
+  }
+}
+
 async function main() {
-  songs = await getSongs("Songs/Density & Time");
-  playMusic(songs[0], true);
+  const savedState = getSavedPlayerState();
 
-  displayAlbums();
+  const initialFolder = savedState?.folder || "songs/Density & Time";
 
-  play.addEventListener("click", () => {
+  songs = await getSongs(initialFolder);
+
+  if (songs.length > 0) {
+    let initialIndex = 0;
+
+    if (savedState?.track) {
+      const savedIndex = songs.indexOf(savedState.track);
+
+      if (savedIndex >= 0) {
+        initialIndex = savedIndex;
+      }
+    }
+
+    const initialTrack = songs[initialIndex];
+
+    currentSongs.addEventListener(
+      "loadedmetadata",
+      () => {
+        if (savedState?.time > 0 && Number.isFinite(currentSongs.duration)) {
+          const restoredTime = Math.min(
+            savedState.time,
+            Math.max(0, currentSongs.duration - 0.1),
+          );
+
+          currentSongs.currentTime = restoredTime;
+
+          const progress = (restoredTime / currentSongs.duration) * 100;
+
+          const seekbar = document.querySelector(".seekbar");
+
+          seekbar.style.setProperty("--progress", `${progress}%`);
+
+          seekbar.style.setProperty("--hover-position", `${progress}%`);
+
+          document.querySelector(".circle").style.left = `${progress}%`;
+
+          document.querySelector(".songtime").textContent =
+            `${formatTime(restoredTime)} / ` +
+            `${formatTime(currentSongs.duration)}`;
+        }
+      },
+      { once: true },
+    );
+
+    playMusic(initialTrack, true, initialIndex);
+  }
+
+  await displayAlbums();
+
+  const playButton = document.querySelector("#play");
+  const previousButton = document.querySelector("#previous");
+  const nextButton = document.querySelector("#next");
+  const volumeSlider = document.querySelector('.range input[type="range"]');
+  const volumeIcon = document.querySelector(".volume > img");
+
+  playButton.addEventListener("click", async () => {
+    if (!currentSongs.src) {
+      return;
+    }
+
     if (currentSongs.paused) {
-      currentSongs.play();
-      play.src = "img/pause.svg";
+      await currentSongs.play();
     } else {
       currentSongs.pause();
-      play.src = "img/play.svg";
     }
   });
 
-  //Listen for timeupdate event
+  currentSongs.addEventListener("play", () => {
+    updateMainPlayIcon();
+    updateSongListIcons();
+    savePlayerState();
+  });
+
+  currentSongs.addEventListener("pause", () => {
+    updateMainPlayIcon();
+    updateSongListIcons();
+    savePlayerState();
+  });
+
   currentSongs.addEventListener("timeupdate", () => {
-    document.querySelector(".songtime").innerHTML = `${formatTime(
-      currentSongs.currentTime
-    )}/${formatTime(currentSongs.duration)}`;
-    document.querySelector(".circle").style.left =
-      (currentSongs.currentTime / currentSongs.duration) * 100 + "%";
+    const progress = currentSongs.duration
+      ? (currentSongs.currentTime / currentSongs.duration) * 100
+      : 0;
+
+    document.querySelector(".songtime").textContent =
+      `${formatTime(currentSongs.currentTime)} / ` +
+      `${formatTime(currentSongs.duration)}`;
+
+    const seekbar = document.querySelector(".seekbar");
+
+    seekbar.style.setProperty("--progress", `${progress}%`);
+    document.querySelector(".circle").style.left = `${progress}%`;
+    savePlayerState();
   });
 
-  //Add an event listener to seekbar
-  document.querySelector(".seekbar").addEventListener("click", (e) => {
-    let percent = (e.offsetX / e.target.getBoundingClientRect().width) * 100;
-    document.querySelector(".circle").style.left = percent + "%";
-    currentSongs.currentTime = (currentSongs.duration * percent) / 100;
+  const seekbar = document.querySelector(".seekbar");
+  const seekTooltip = document.querySelector(".seek-tooltip");
+  const progressCircle = document.querySelector(".circle");
+
+  function getSeekPercent(event) {
+    const rect = seekbar.getBoundingClientRect();
+    const pointerX = event.clientX - rect.left;
+
+    return Math.min(100, Math.max(0, (pointerX / rect.width) * 100));
+  }
+
+  seekbar.addEventListener("pointermove", (event) => {
+    const percent = getSeekPercent(event);
+
+    seekbar.style.setProperty(
+      "--hover-position",
+      `${Math.max(
+        percent,
+        Number.parseFloat(seekbar.style.getPropertyValue("--progress")) || 0,
+      )}%`,
+    );
+
+    seekTooltip.style.left = `${percent}%`;
+
+    const previewTime = currentSongs.duration
+      ? (currentSongs.duration * percent) / 100
+      : 0;
+
+    seekTooltip.textContent = formatTime(previewTime);
   });
 
-  //Add an event listener to hamburger
+  seekbar.addEventListener("pointerleave", () => {
+    const progress = currentSongs.duration
+      ? (currentSongs.currentTime / currentSongs.duration) * 100
+      : 0;
+
+    seekbar.style.setProperty("--hover-position", `${progress}%`);
+  });
+
+  seekbar.addEventListener("pointerdown", (event) => {
+    if (!currentSongs.duration) {
+      return;
+    }
+
+    const percent = getSeekPercent(event);
+    const newTime = (currentSongs.duration * percent) / 100;
+
+    // Update the interface immediately.
+    seekbar.style.setProperty("--progress", `${percent}%`);
+    seekbar.style.setProperty("--hover-position", `${percent}%`);
+    progressCircle.style.left = `${percent}%`;
+    seekTooltip.style.left = `${percent}%`;
+    seekTooltip.textContent = formatTime(newTime);
+
+    // Update the audio after synchronizing the interface.
+    currentSongs.currentTime = newTime;
+
+    document.querySelector(".songtime").textContent =
+      `${formatTime(newTime)} / ${formatTime(currentSongs.duration)}`;
+  });
+
   document.querySelector(".hamburger").addEventListener("click", () => {
     document.querySelector(".left").style.left = "0";
   });
 
-  //Add an event listener to close the hamburger 1
-  document.querySelector(".spotifyPlaylists").addEventListener("click", () => {
+  document.querySelector(".musicPlaylists").addEventListener("click", () => {
     document.querySelector(".left").style.left = "-120%";
   });
-  //Add an event listener to close the hamburger 2
+
   document.querySelector(".close").addEventListener("click", () => {
     document.querySelector(".left").style.left = "-120%";
   });
 
-  //Add an event lisenter to previous
-  previous.addEventListener("click", () => {
-    if (currentSongIndex - 1 >= 0) {
+  previousButton.addEventListener("click", () => {
+    if (currentSongIndex > 0) {
       playMusic(songs[currentSongIndex - 1], false, currentSongIndex - 1);
     }
   });
 
-  //Add an event lisenter to next
-  next.addEventListener("click", () => {
+  nextButton.addEventListener("click", () => {
     if (currentSongIndex + 1 < songs.length) {
       playMusic(songs[currentSongIndex + 1], false, currentSongIndex + 1);
     }
   });
 
-  // Automatically play next song when current ends
   currentSongs.addEventListener("ended", () => {
     if (currentSongIndex + 1 < songs.length) {
       playMusic(songs[currentSongIndex + 1], false, currentSongIndex + 1);
+    } else {
+      updateMainPlayIcon();
+      updateSongListIcons();
     }
   });
 
-  let lastVolume = 0.75; // Default Volume
-
-  // Set initial volume and slider position
   currentSongs.volume = lastVolume;
-  document.querySelector(".range").getElementsByTagName("input")[0].value =
-    lastVolume * 100;
-  document.querySelector(".volume>img").src = "img/Volume-Full.svg"; // Set initial icon
+  volumeSlider.value = Math.round(lastVolume * 100);
+  updateVolumeIcon();
 
-  //Add an event listener to volume
-  document
-    .querySelector(".range")
-    .getElementsByTagName("input")[0]
-    .addEventListener("input", (e) => {
-      currentSongs.volume = parseInt(e.target.value) / 100;
-      if (currentSongs.volume > 0) {
-        lastVolume = currentSongs.volume; // Save the last non-zero volume
-      }
-      if (currentSongs.volume >= 0.7) {
-        document.querySelector(".volume>img").src = "img/Volume-Full.svg";
-      } else if (currentSongs.volume >= 0.3 && currentSongs.volume < 0.7) {
-        document.querySelector(".volume>img").src = "img/Volume-Half.svg";
-      } else if (currentSongs.volume > 0 && currentSongs.volume < 0.3) {
-        document.querySelector(".volume>img").src = "img/Volume-Low.svg";
-      } else {
-        document.querySelector(".volume>img").src = "img/Volume-Mute.svg";
-      }
-    });
+  document.querySelector(".volume").classList.add("volume-ready");
 
-  //Add event listener to mute the track
-  document.querySelector(".volume>img").addEventListener("click", (e) => {
-    if (
-      e.target.src.includes("Volume-Full.svg") ||
-      e.target.src.includes("Volume-Half.svg") ||
-      e.target.src.includes("Volume-Low.svg")
-    ) {
-      e.target.src = e.target.src.replace(
-        /Volume-(Full|Half|Low)\.svg/,
-        "Volume-Mute.svg"
+  volumeSlider.addEventListener("input", (event) => {
+    currentSongs.volume = Number(event.target.value) / 100;
+
+    if (currentSongs.volume > 0) {
+      lastVolume = currentSongs.volume;
+      localStorage.setItem(
+        "nksMusicPlayerVolume",
+        currentSongs.volume.toString(),
       );
-      lastVolume = currentSongs.volume > 0 ? currentSongs.volume : lastVolume; // Save current volume if not zero
-      currentSongs.volume = 0;
-      document
-        .querySelector(".range")
-        .getElementsByTagName("input")[0].value = 0;
-    } else {
-      currentSongs.volume = lastVolume;
-      document.querySelector(".range").getElementsByTagName("input")[0].value =
-        lastVolume * 100;
-
-      if (lastVolume > 0 && lastVolume < 0.3) {
-        e.target.src = e.target.src.replace(
-          "Volume-Mute.svg",
-          "Volume-Low.svg"
-        );
-      } else if (lastVolume >= 0.3 && lastVolume < 0.7) {
-        e.target.src = e.target.src.replace(
-          "Volume-Mute.svg",
-          "Volume-Half.svg"
-        );
-      } else {
-        e.target.src = e.target.src.replace(
-          "Volume-Mute.svg",
-          "Volume-Full.svg"
-        );
-      }
     }
+
+    updateVolumeIcon();
+  });
+
+  volumeIcon.addEventListener("click", () => {
+    if (currentSongs.volume > 0) {
+      lastVolume = currentSongs.volume;
+      currentSongs.volume = 0;
+      volumeSlider.value = 0;
+    } else {
+      currentSongs.volume = lastVolume > 0 ? lastVolume : 0.75;
+      volumeSlider.value = currentSongs.volume * 100;
+    }
+
+    updateVolumeIcon();
+  });
+  window.addEventListener("beforeunload", () => {
+    savePlayerState();
   });
 }
 
-main();
+main().catch((error) => {
+  console.error("Music player failed to start:", error);
+});

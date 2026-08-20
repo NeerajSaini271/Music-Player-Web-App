@@ -1,58 +1,73 @@
-# Spotify-Clone
-A responsive Spotify Clone built using HTML, CSS, and JavaScript with music playback and playlists.
+<p align="center">
+  <img src="img/logo-full.svg" alt="NKS MusicPlayer logo" width="300" />
+</p>
 
-![Spotify Clone screenshot](img/Spotify%20Clone.png)
+<h1 align="center">NKS MusicPlayer</h1>
 
-**Live demo:** https://spotify-clone-bm.netlify.app/
+<p align="center">
+  A responsive browser-based music player built with HTML, CSS, and vanilla JavaScript.
+</p>
 
-## Summary
-This project is a front-end replica of the Spotify landing page and music player, built using **HTML**, **CSS**, and **Vanilla JavaScript**. It features a responsive layout, playlists, and interactive music controls. The design emphasizes mobile-first responsiveness and clean UI structure.
+## Overview
+
+NKS MusicPlayer is an independent educational web project that loads locally available album metadata and audio tracks. The interface includes album browsing, a scrollable song library, synchronized play and pause controls, track navigation, seeking, volume control, mute restoration, and responsive navigation.
 
 ## Features
-- Responsive layout for player and playlist
-- Play/pause functionality and basic track navigation
-- Semantic HTML and organized CSS for maintainability
-- Mobile-first design for a seamless experience on all devices
+
+- Original NKS MusicPlayer logo and browser favicon
+- Responsive album and playlist interface
+- Play, pause, previous, and next controls
+- Song-row icons synchronized with the main player
+- Automatic playback of the next track
+- Interactive seek bar with hover preview and time tooltip
+- Volume slider with low, medium, full, and mute icons
+- Restores the previous volume after unmuting
+- Local album metadata and cover artwork
+- Responsive sidebar for smaller screens
 
 ## Tech Stack
-- HTML5  
-- CSS3 (Grid & Flexbox)  
-- JavaScript (Vanilla)
 
-## Live Demo
-[https://spotify-clone-bm.netlify.app/](https://spotify-clone-bm.netlify.app/)
+- HTML5
+- CSS3
+- JavaScript
+- Web Audio API through the HTMLAudioElement interface
+- JSON album metadata
 
-## Getting Started
-1. Clone or download the repository.  
-2. Ensure the `img/` folder contains `Spotify Clone.png`.  
-3. Open `index.html` in your browser to run the project locally.  
-4. Optional: Use a local static server (e.g., `npx http-server`) to simulate hosting.
+## Run Locally
+
+1. Clone or download the repository.
+2. Open the project folder in Visual Studio Code.
+3. Start the project with the VS Code Live Server extension.
+4. Open the generated local URL in a browser.
+
+The player requires a local web server because the application loads JSON metadata with `fetch()`.
 
 ## Project Structure
-/
-├─ index.html
-├─ css/
-│ └─ styles.css
-├─ js/
-│ └─ app.js
-├─ img/
-│ └─ Spotify Clone.png
-└─ README.md
 
-## Responsive / Styling Notes
-- Layout uses CSS Grid and Flexbox for main player and playlists
-- Breakpoints implemented for tablets and mobile screens
-- Images and player elements scale fluidly (`max-width: 100%` and `height: auto`)
-- Text sizes use relative units (`rem` / `clamp()`) for better readability on smaller devices
+```text
+Music-Player-Web-App/
+├── img/
+│   ├── logo.svg
+│   ├── logo-full.svg
+│   └── player-control icons
+├── songs/
+│   └── local album folders and metadata
+├── albums.json
+├── index.html
+├── script.js
+├── style.css
+├── utility.css
+└── README.md
+```
 
-## Roadmap / Future Improvements
-- Add track search and dynamic playlist filtering
-- Implement more interactive UI elements (volume control, progress bar)
-- Enhance accessibility with ARIA labels and keyboard navigation
-- Optional: Integrate a backend for real audio streaming
+## Important Content Note
 
-## License
-MIT
+The repository interface is an independent educational project. Audio files and cover artwork must only be distributed or deployed when the relevant permissions or licenses allow public use.
 
-## Resume Bullet
-- Developed a responsive Spotify landing/player clone using HTML, CSS, and JavaScript; implemented mobile-first design, interactive music controls, and semantic, maintainable code structure.
+## Author
+
+**Neeraj Kumar Saini**
+
+- GitHub: [NeerajSaini271](https://github.com/NeerajSaini271)
+- LinkedIn: [neerajsaini271](https://www.linkedin.com/in/neerajsaini271)
+- Email: [neerajkhetrisaini@gmail.com](mailto:neerajkhetrisaini@gmail.com)

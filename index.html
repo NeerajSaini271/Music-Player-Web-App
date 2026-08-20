@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spotify - Web Player: Music for everyone</title>    
-    </script><link rel="stylesheet" href="style.css" />
+    <title>NKS MusicPlayer | Web Audio Player</title>
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg" />
+    <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="utility.css" />
   </head>
   <body>
@@ -14,7 +15,7 @@
           <img src="img/close.svg" alt="" />
         </div>
         <div class="home bg-grey rounded m-1 p-1">
-          <img src="/img/logo-full.svg" alt="Spotify" />
+          <img src="img/logo-full.svg" alt="NKS MusicPlayer" />
           <ul>
             <li><img src="img/home.svg" width="50px" alt="Home" />Home</li>
             <li>
@@ -24,42 +25,52 @@
         </div>
         <div class="library bg-grey rounded m-1 p-1">
           <div class="heading">
-            <img src="/img/playlist.svg" alt="playlist" />
+            <img src="img/playlist.svg" alt="playlist" />
             <h2>Your Library</h2>
           </div>
           <div class="songList">
             <ul></ul>
           </div>
+
           <div class="footer">
             <div>
-              <a href="https://www.spotify.com/in-en/legal/"
-                ><span>Legal</span></a
+              <a
+                href="https://github.com/NeerajSaini271"
+                target="_blank"
+                rel="noopener noreferrer"
               >
+                <span>GitHub</span>
+              </a>
             </div>
+
             <div>
-              <a href="https://www.spotify.com/in-en/safetyandprivacy/"
-                ><span>Safety & Privacy Center</span></a
+              <a
+                href="https://www.linkedin.com/in/neerajsaini271"
+                target="_blank"
+                rel="noopener noreferrer"
               >
+                <span>LinkedIn</span>
+              </a>
             </div>
+
             <div>
-              <a href="https://www.spotify.com/in-en/legal/privacy-policy/"
-                ><span>Privacy Policy</span></a
+              <a
+                href="https://github.com/NeerajSaini271/Music-Player-Web-App"
+                target="_blank"
+                rel="noopener noreferrer"
               >
+                <span>Source Code</span>
+              </a>
             </div>
+
             <div>
-              <a href="https://www.spotify.com/in-en/legal/cookies-policy/"
-                ><span>Cookies</span></a
-              >
+              <a href="mailto:neerajkhetrisaini@gmail.com">
+                <span>Contact</span>
+              </a>
             </div>
+
             <div>
-              <a href="https://www.spotify.com/in-en/legal/privacy-policy/#s3"
-                ><span>About Ads</span></a
-              >
-            </div>
-            <div>
-              <a href="https://www.spotify.com/in-en/accessibility/"
-                ><span>Accessibility</span></a
-              >
+              <span>Independent educational project</span>
             </div>
           </div>
         </div>
@@ -100,12 +111,18 @@
             </svg>
           </div>
           <div class="buttons">
-            <button class="signupbtn">Sign Up</button>
-            <button class="loginbtn">Login</button>
+            <a
+              class="projectbtn"
+              href="https://github.com/NeerajSaini271/Music-Player-Web-App"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Source Code
+            </a>
           </div>
         </div>
-        <div class="spotifyPlaylists">
-          <h1>Spotify Playlist</h1>
+        <div class="musicPlaylists">
+          <h1>Music Playlists</h1>
           <div class="cardContainer"></div>
         </div>
         <div class="playbar">
@@ -145,7 +162,7 @@
             <div class="timevol">
               <div class="songtime"></div>
               <div class="volume">
-                <img src="img/Volume-Full.svg" alt="" width="24px" />
+                <img src="img/volume-full.svg" alt="" width="24px" />
                 <div class="range">
                   <input type="range" name="volume" id="" />
                 </div>
@@ -154,6 +171,7 @@
           </div>
           <div class="seekbar">
             <div class="circle"></div>
+            <div class="seek-tooltip">00:00</div>
           </div>
         </div>
       </div>
