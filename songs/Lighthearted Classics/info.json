@@ -1,0 +1,13 @@
+{
+  "title": "Lighthearted Classics",
+  "description": "Playful CC0 public-domain selections for unrestricted demo use.",
+  "cover": "cover.jpg",
+  "songs": [
+    "Barroom Ballet.mp3",
+    "BeBop for Joey.mp3",
+    "Busybody.mp3"
+  ],
+  "license": "CC0 1.0 Universal",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "source": "https://en.freepd.cn/music"
+}

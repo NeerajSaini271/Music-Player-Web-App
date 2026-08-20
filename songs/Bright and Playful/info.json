@@ -1,0 +1,13 @@
+{
+  "title": "Bright and Playful",
+  "description": "Cheerful CC0 public-domain music for the NKS MusicPlayer demo.",
+  "cover": "cover.jpg",
+  "songs": [
+    "Alls Fair In Love.mp3",
+    "Baltic Levity.mp3",
+    "Barnville.mp3"
+  ],
+  "license": "CC0 1.0 Universal",
+  "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "source": "https://en.freepd.cn/music"
+}

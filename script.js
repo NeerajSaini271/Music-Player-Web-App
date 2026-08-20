@@ -281,10 +281,32 @@ function updateVolumeIcon() {
 async function main() {
   const savedState = getSavedPlayerState();
 
-  const initialFolder = savedState?.folder || "songs/Density & Time";
+  const albumsRequest = await fetch("albums.json");
+
+  if (!albumsRequest.ok) {
+    throw new Error("Could not load albums.json");
+  }
+
+  const albumFolders = await albumsRequest.json();
+
+  if (albumFolders.length === 0) {
+    throw new Error("No albums are available.");
+  }
+
+  const defaultFolder = `songs/${albumFolders[0]}`;
+
+  const savedFolderName = savedState?.folder?.replace(/^songs\//, "");
+
+  const savedFolderExists =
+    savedFolderName && albumFolders.includes(savedFolderName);
+
+  const initialFolder = savedFolderExists ? savedState.folder : defaultFolder;
+
+  if (!savedFolderExists) {
+    localStorage.removeItem(PLAYER_STATE_KEY);
+  }
 
   songs = await getSongs(initialFolder);
-
   if (songs.length > 0) {
     let initialIndex = 0;
 

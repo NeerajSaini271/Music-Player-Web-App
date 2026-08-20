@@ -60,6 +60,10 @@ Music-Player-Web-App/
 └── README.md
 ```
 
+## Included Demo Audio
+
+The included demo tracks are CC0 1.0 Universal public-domain music. See [`AUDIO-LICENSES.md`](AUDIO-LICENSES.md) for source URLs, hashes, and license details.
+
 ## Important Content Note
 
 The repository interface is an independent educational project. Audio files and cover artwork must only be distributed or deployed when the relevant permissions or licenses allow public use.
