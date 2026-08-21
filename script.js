@@ -413,6 +413,8 @@ async function main() {
   const seekTooltip = document.querySelector(".seek-tooltip");
   const progressCircle = document.querySelector(".circle");
 
+  let isSeeking = false;
+
   function getSeekPercent(event) {
     const rect = seekbar.getBoundingClientRect();
     const pointerX = event.clientX - rect.left;
@@ -420,15 +422,52 @@ async function main() {
     return Math.min(100, Math.max(0, (pointerX / rect.width) * 100));
   }
 
+  function updateSeekPosition(event) {
+    if (!currentSongs.duration) {
+      return;
+    }
+
+    const percent = getSeekPercent(event);
+    const newTime = (currentSongs.duration * percent) / 100;
+
+    seekbar.style.setProperty("--progress", `${percent}%`);
+
+    seekbar.style.setProperty("--hover-position", `${percent}%`);
+
+    progressCircle.style.left = `${percent}%`;
+    seekTooltip.style.left = `${percent}%`;
+    seekTooltip.textContent = formatTime(newTime);
+
+    currentSongs.currentTime = newTime;
+
+    document.querySelector(".songtime").textContent =
+      `${formatTime(newTime)} / ` + `${formatTime(currentSongs.duration)}`;
+  }
+
+  seekbar.addEventListener("pointerdown", (event) => {
+    if (!currentSongs.duration) {
+      return;
+    }
+
+    isSeeking = true;
+    seekbar.setPointerCapture(event.pointerId);
+    updateSeekPosition(event);
+  });
+
   seekbar.addEventListener("pointermove", (event) => {
     const percent = getSeekPercent(event);
 
+    if (isSeeking) {
+      updateSeekPosition(event);
+      return;
+    }
+
+    const currentProgress =
+      Number.parseFloat(seekbar.style.getPropertyValue("--progress")) || 0;
+
     seekbar.style.setProperty(
       "--hover-position",
-      `${Math.max(
-        percent,
-        Number.parseFloat(seekbar.style.getPropertyValue("--progress")) || 0,
-      )}%`,
+      `${Math.max(percent, currentProgress)}%`,
     );
 
     seekTooltip.style.left = `${percent}%`;
@@ -440,34 +479,37 @@ async function main() {
     seekTooltip.textContent = formatTime(previewTime);
   });
 
+  function stopSeeking(event) {
+    if (!isSeeking) {
+      return;
+    }
+
+    updateSeekPosition(event);
+    isSeeking = false;
+
+    if (seekbar.hasPointerCapture(event.pointerId)) {
+      seekbar.releasePointerCapture(event.pointerId);
+    }
+
+    savePlayerState();
+  }
+
+  seekbar.addEventListener("pointerup", stopSeeking);
+
+  seekbar.addEventListener("pointercancel", () => {
+    isSeeking = false;
+  });
+
   seekbar.addEventListener("pointerleave", () => {
+    if (isSeeking) {
+      return;
+    }
+
     const progress = currentSongs.duration
       ? (currentSongs.currentTime / currentSongs.duration) * 100
       : 0;
 
     seekbar.style.setProperty("--hover-position", `${progress}%`);
-  });
-
-  seekbar.addEventListener("pointerdown", (event) => {
-    if (!currentSongs.duration) {
-      return;
-    }
-
-    const percent = getSeekPercent(event);
-    const newTime = (currentSongs.duration * percent) / 100;
-
-    // Update the interface immediately.
-    seekbar.style.setProperty("--progress", `${percent}%`);
-    seekbar.style.setProperty("--hover-position", `${percent}%`);
-    progressCircle.style.left = `${percent}%`;
-    seekTooltip.style.left = `${percent}%`;
-    seekTooltip.textContent = formatTime(newTime);
-
-    // Update the audio after synchronizing the interface.
-    currentSongs.currentTime = newTime;
-
-    document.querySelector(".songtime").textContent =
-      `${formatTime(newTime)} / ${formatTime(currentSongs.duration)}`;
   });
 
   document.querySelector(".hamburger").addEventListener("click", () => {
